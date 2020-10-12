@@ -3,17 +3,17 @@ const Message = require( '../models/Message' );
 
 const notificationCtrl = { };
 
-notificationCtrl.addMessage = async ( req, res, next) => {
+notificationCtrl.createNotification = async ( req, res, next) => {
     try{
-        const { userId, senderId, texto} = req.body;
-        if ( !userId || !senderId || !texto)
+        const { userId, conversationId,  message, senderId} = req.body;
+        if ( !userId || !conversationId || !message || !senderId)
             throw "The required data is incomplete";
 
-        const msg = new Message( req.body );
-        await msg.save();
-        console.log(msg.id);
-        req.body.messageId = msg.id
-        return next( );
+        const notification = new Notification( req.body );
+        await notification.save();
+        console.log(notification.id);
+        console.log(notification);
+        return res.status( 201 ).json(notification);
     }catch ( err ) {
         if( !err.message ) {
             return res.status( 400 ).json({ message: err });
@@ -24,8 +24,8 @@ notificationCtrl.addMessage = async ( req, res, next) => {
         }
     }
 };
-
-notificationCtrl.addNotification = async ( req, res ) => {
+/*
+notificationCtrl.createNotification = async ( req, res ) => {
     try{
         const { userId, messageId } = req.body;
         console.log(req.body);
@@ -48,9 +48,9 @@ notificationCtrl.addNotification = async ( req, res ) => {
             });
         }
     }
-};
+};*/
 
-notificationCtrl.removeNotification = async ( req, res ) => {
+notificationCtrl.deleteNotification = async ( req, res ) => {
     try {
         const userId = req.params.userId;
         const notificationId = req.params.notificationId;
@@ -73,7 +73,7 @@ notificationCtrl.removeNotification = async ( req, res ) => {
     }
 }
 
-notificationCtrl.removeAllNotifications = async ( req, res ) => {
+notificationCtrl.deleteAllNotifications = async ( req, res ) => {
     try {
         const userId = req.params.userId;
         if ( !userId )
@@ -132,7 +132,7 @@ notificationCtrl.getNotification = async ( req, res ) => {
         const notification = await Notification.findById(notificationId).populate({
             path:'messageId',
             select: ['texto','senderId']
-        });;
+        });
 
         if ( !notification ) {
             return res.status( 200 ).json({
